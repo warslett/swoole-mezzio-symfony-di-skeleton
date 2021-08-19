@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+
+  app:
+    image: php-swoole:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    restart: always
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: 'php application.php'
+    ports:
+      - 30000:30000
