@@ -6,6 +6,7 @@ namespace App\Middleware;
 
 use App\Exception\Http\NotFoundException;
 use App\Responder;
+use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -22,9 +23,15 @@ final class ErrorHandler implements MiddlewareInterface
         try {
             return $handler->handle($request);
         } catch (NotFoundException $exception) {
-            return $this->responder->buildErrorResponse(404, $exception->getMessage());
+            return $this->responder->buildErrorResponse(
+                StatusCodeInterface::STATUS_NOT_FOUND,
+                $exception->getMessage()
+            );
         } catch (\Throwable $throwable) {
-            return $this->responder->buildErrorResponse(500, "Something went wrong");
+            return $this->responder->buildErrorResponse(
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR,
+                "Something went wrong"
+            );
         }
     }
 }

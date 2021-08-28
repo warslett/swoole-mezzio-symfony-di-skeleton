@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Action\NotFound as NotFoundHandler;
 use App\Middleware\ErrorHandler;
-use App\Middleware\RequestLogger;
 use Mezzio\Application;
 use Mezzio\Helper\ServerUrlMiddleware;
 use Mezzio\Helper\UrlHelperMiddleware;
@@ -17,7 +16,6 @@ use Mezzio\Router\Middleware\RouteMiddleware;
 use Psr\Container\ContainerInterface;
 
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
-    $app->pipe(RequestLogger::class);
     $app->pipe(ErrorHandler::class);
     $app->pipe(ServerUrlMiddleware::class);
     $app->pipe(RouteMiddleware::class);
