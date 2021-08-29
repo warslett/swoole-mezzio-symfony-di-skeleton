@@ -32,48 +32,26 @@ use Mezzio\Swoole\Log\AccessLogInterface;
 use Mezzio\Swoole\Log\Psr3AccessLogDecorator;
 use Mezzio\Swoole\ServerRequestSwooleFactory;
 use Mezzio\Swoole\SwooleRequestHandlerRunner;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerInterface;
 use Swoole\Http\Server;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 return function(ContainerConfigurator $configurator) {
-    $parameters = $configurator->parameters();
     $services = $configurator->services();
-
-    $parameters->set('project_dir', dirname(__DIR__));
 
     $services->defaults()
         ->autowire();
-
-    $services->set('logger.handler.stdout')
-        ->class(StreamHandler::class)
-        ->arg('$stream', 'php://stdout');
-
-    $services->set('logger.app')
-        ->class(Logger::class)
-        ->arg('$name', 'app')
-        ->call('pushHandler', [service('logger.handler.stdout')]);
-
-    $services->set('logger.access')
-        ->class(Logger::class)
-        ->arg('$name', 'access')
-        ->call('pushHandler', [service('logger.handler.stdout')]);
-
-    $services->alias(LoggerInterface::class, 'logger.app');
 
     $services->set(MiddlewareContainer::class);
 
     $services->set(MiddlewareFactory::class)
         ->public();
 
-    $services->set(MiddlewarePipeInterface::class)
-        ->class(MiddlewarePipe::class);
+    $services->set(MiddlewarePipe::class);
 
-    $services->set(RouterInterface::class)
-        ->class(LaminasRouter::class);
+    $services->alias(MiddlewarePipeInterface::class, MiddlewarePipe::class);
+
+    $services->set(LaminasRouter::class);
+
+    $services->alias(RouterInterface::class, LaminasRouter::class);
 
     $services->set(RouteCollector::class);
 
@@ -103,11 +81,8 @@ return function(ContainerConfigurator $configurator) {
     $services->set(RequestHandlerRequestListener::class)
         ->arg('$requestHandler', service(MiddlewarePipeInterface::class))
         ->arg('$serverRequestFactory', service('mezzio.swoole.server_request_factory'))
-        ->arg('$serverRequestErrorResponseGenerator', service(ServerRequestErrorResponseGenerator::class));
-
-    $services->set(EventDispatcherInterface::class)
-        ->class(EventDispatcher::class)
-        ->call('addListener', [RequestEvent::class, service(RequestHandlerRequestListener::class)]);
+        ->arg('$serverRequestErrorResponseGenerator', service(ServerRequestErrorResponseGenerator::class))
+        ->tag('listener', ['event' => RequestEvent::class]);
 
     $services->set(SwooleRequestHandlerRunner::class);
 
@@ -139,13 +114,5 @@ return function(ContainerConfigurator $configurator) {
         ->public();
 
     $services->set(Application::class)
-        ->public();
-
-    $services->load('App\\', '%project_dir%/src/');
-
-    $services->load('App\\Action\\', '%project_dir%/src/Action/')
-        ->public();
-
-    $services->load('App\\Middleware\\', '%project_dir%/src/Middleware/')
         ->public();
 };
