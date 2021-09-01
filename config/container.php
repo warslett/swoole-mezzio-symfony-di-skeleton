@@ -18,7 +18,8 @@ $containerBuilder->addCompilerPass(new RegisterListenersPass(
 ));
 
 $loader = new PhpFileLoader($containerBuilder, new FileLocator(__DIR__));
-$loader->import('{services}/*.php');
+$loader->import('services/*.php');
+$loader->import('services/' . $_ENV['ENV'] . '/*.php', null, true);
 
 $containerBuilder->compile();
 return $containerBuilder;

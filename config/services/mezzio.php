@@ -57,7 +57,8 @@ return function(ContainerConfigurator $configurator) {
 
     $services->set(Server::class)
         ->arg('$host', '0.0.0.0')
-        ->arg('$port', 30000);
+        ->arg('$port', 30000)
+        ->call('set', [['log_level' => 0, 'log_file' => '/var/log/swoole.log']]);
 
     $services->set(ServerRequestSwooleFactory::class);
 

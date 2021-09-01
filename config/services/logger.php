@@ -28,5 +28,10 @@ return function(ContainerConfigurator $configurator) {
         ->arg('$name', 'access')
         ->call('pushHandler', [service('logger.handler.stdout')]);
 
+    $services->set('logger.swoole')
+        ->class(Logger::class)
+        ->arg('$name', 'swoole')
+        ->call('pushHandler', [service('logger.handler.stdout')]);
+
     $services->alias(LoggerInterface::class, 'logger.app');
 };

@@ -4,11 +4,13 @@ FROM platform as dev
 
 ENV COMPOSER_HOME /tmp
 
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+RUN pecl install inotify \
+    && docker-php-ext-enable inotify \
+    && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer \
-    && rm -rf /tmp/* /tmp/.htaccess \
+    && rm -rf /tmp/* /tmp/.htaccess
 
 FROM dev as prod
 

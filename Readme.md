@@ -3,6 +3,7 @@ This repo is a skeleton of a PHP project which uses Swoole, Mezzio, PSR-15 Reque
 
 ## Dev set up
 ```bash
+cp .env.dist .env
 make composer install
 docker-compose up -d
 ```
