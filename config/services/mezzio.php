@@ -24,6 +24,10 @@ use Mezzio\Router\Middleware\MethodNotAllowedMiddleware;
 use Mezzio\Router\Middleware\RouteMiddleware;
 use Mezzio\Router\RouteCollector;
 use Mezzio\Router\RouterInterface;
+use Mezzio\Swoole\Command\ReloadCommand;
+use Mezzio\Swoole\Command\StartCommand;
+use Mezzio\Swoole\Command\StatusCommand;
+use Mezzio\Swoole\Command\StopCommand;
 use Mezzio\Swoole\Event\RequestEvent;
 use Mezzio\Swoole\Event\RequestHandlerRequestListener;
 use Mezzio\Swoole\Event\ServerShutdownEvent;
@@ -65,7 +69,8 @@ return function(ContainerConfigurator $configurator) {
     $services->set(Server::class)
         ->arg('$host', '0.0.0.0')
         ->arg('$port', 30000)
-        ->call('set', [['log_level' => 0, 'log_file' => '/var/log/swoole.log']]);
+        ->call('set', [['log_level' => 0, 'log_file' => '/var/log/swoole.log']])
+        ->public();
 
     $services->set(ServerRequestSwooleFactory::class);
 
@@ -93,7 +98,8 @@ return function(ContainerConfigurator $configurator) {
         ->tag('listener', ['event' => RequestEvent::class]);
 
     $services->set(PidManager::class)
-        ->arg('$pidFile', '/tmp/swoole.pid');
+        ->arg('$pidFile', '/tmp/swoole.pid')
+        ->public();
 
     $services->set(ServerStartListener::class)
         ->arg('$logger', service('logger.swoole'))
@@ -140,4 +146,17 @@ return function(ContainerConfigurator $configurator) {
 
     $services->set(Application::class)
         ->public();
+
+    $services->set(StartCommand::class)
+        ->tag('console.command');
+
+    $services->set(ReloadCommand::class)
+        ->arg('$serverMode', SWOOLE_PROCESS)
+        ->tag('console.command');
+
+    $services->set(StatusCommand::class)
+        ->tag('console.command');
+
+    $services->set(StopCommand::class)
+        ->tag('console.command');
 };

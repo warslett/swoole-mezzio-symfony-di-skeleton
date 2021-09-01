@@ -1,0 +1,17 @@
+#!/usr/local/bin/php
+<?php
+
+declare(strict_types=1);
+
+require_once 'vendor/autoload.php';
+
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Application;
+
+/** @var ContainerInterface $container */
+$container = require dirname(__DIR__, 1) . '/config/container.php';
+
+/** @var Application $application */
+$application = $container->get(Application::class);
+
+$application->run();
