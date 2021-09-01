@@ -11,5 +11,5 @@ docker-compose up -d
 ## Build production image
 ```bash
 docker build -t swoole-mezzio-symfony-di .
-docker run -p 30000:30000 swoole-mezzio-symfony-di
+docker run -e ENV=prod -p 30000:30000 swoole-mezzio-symfony-di
 ```

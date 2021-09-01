@@ -26,10 +26,17 @@ use Mezzio\Router\RouteCollector;
 use Mezzio\Router\RouterInterface;
 use Mezzio\Swoole\Event\RequestEvent;
 use Mezzio\Swoole\Event\RequestHandlerRequestListener;
+use Mezzio\Swoole\Event\ServerShutdownEvent;
+use Mezzio\Swoole\Event\ServerShutdownListener;
+use Mezzio\Swoole\Event\ServerStartEvent;
+use Mezzio\Swoole\Event\ServerStartListener;
+use Mezzio\Swoole\Event\WorkerStartEvent;
+use Mezzio\Swoole\Event\WorkerStartListener;
 use Mezzio\Swoole\Log\AccessLogFormatter;
 use Mezzio\Swoole\Log\AccessLogFormatterInterface;
 use Mezzio\Swoole\Log\AccessLogInterface;
 use Mezzio\Swoole\Log\Psr3AccessLogDecorator;
+use Mezzio\Swoole\PidManager;
 use Mezzio\Swoole\ServerRequestSwooleFactory;
 use Mezzio\Swoole\SwooleRequestHandlerRunner;
 use Swoole\Http\Server;
@@ -84,6 +91,23 @@ return function(ContainerConfigurator $configurator) {
         ->arg('$serverRequestFactory', service('mezzio.swoole.server_request_factory'))
         ->arg('$serverRequestErrorResponseGenerator', service(ServerRequestErrorResponseGenerator::class))
         ->tag('listener', ['event' => RequestEvent::class]);
+
+    $services->set(PidManager::class)
+        ->arg('$pidFile', '/tmp/swoole.pid');
+
+    $services->set(ServerStartListener::class)
+        ->arg('$logger', service('logger.swoole'))
+        ->arg('$cwd', '%project_dir%')
+        ->tag('listener', ['event' => ServerStartEvent::class]);
+
+    $services->set(WorkerStartListener::class)
+        ->arg('$logger', service('logger.swoole'))
+        ->arg('$cwd', '%project_dir%')
+        ->tag('listener', ['event' => WorkerStartEvent::class]);
+
+    $services->set(ServerShutdownListener::class)
+        ->arg('$logger', service('logger.swoole'))
+        ->tag('listener', ['event' => ServerShutdownEvent::class]);
 
     $services->set(SwooleRequestHandlerRunner::class);
 

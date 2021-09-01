@@ -16,7 +16,7 @@ return function(ContainerConfigurator $configurator) {
         ->autowire();
 
     $services->set(InotifyFileWatcher::class)
-        ->call('addFilePath', ['%project_dir%/config', '%project_dir%/src']);
+        ->call('addFilePath', ['%project_dir%']);
 
     $services->alias(FileWatcherInterface::class, InotifyFileWatcher::class);
 
